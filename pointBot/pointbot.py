@@ -1,9 +1,3 @@
-# look into add_check to automate the checks rather than do each one yourself maybe?
-# its a global check
-# convert into bbot for personal server usage
-# test out server tomorrow
-
-
 import os
 import discord 
 
@@ -33,7 +27,8 @@ class member:
 member_list = []
 
 
-
+# start up, creates channel 'point-bot' for
+# all commands
 @bot.command(name='start', help='create a channel, must be role role1, role2')
 @commands.has_any_role('role1', 'role2')
 async def start(ctx):
@@ -46,7 +41,7 @@ async def start(ctx):
 
 
 
-
+# add a member to the point list
 @bot.command(name='add', help='add a user to the point list, starts at 250')
 @commands.has_any_role('role1', 'role2')
 async def add_member(ctx, user_name: str):
@@ -56,7 +51,7 @@ async def add_member(ctx, user_name: str):
 
     for memb in member_list:
         if memb.name == user_name:
-            message = f'{user_name} is already in point list.Current point list: \n - ' + '\n - '.join([f'{memb.name}: {memb.points}' for memb in member_list])
+            message = f'{user_name} is already in point list. Current point list: \n - ' + '\n - '.join([f'{memb.name}: {memb.points}' for memb in member_list])
             await ctx.send(message)
             return
 
@@ -73,7 +68,7 @@ async def add_member(ctx, user_name: str):
 
 
 
-
+# add all members by specifying a role
 @bot.command(name='add-role', help='add all users that are under a certain role')
 @commands.has_any_role('role1', 'role2')
 async def add_member_role(ctx, role_name: str):
@@ -89,15 +84,18 @@ async def add_member_role(ctx, role_name: str):
             if role in user.roles and user.name not in curr_names:
                 member_list.append(member(user.name))
         
-        member_list.sort(key = lambda x: x.points, reverse=True)
-        message = f'{role.name} has been added to point list. The new point list: \n - ' + '\n - '.join([f'{memb.name}: {memb.points}' for memb in member_list])
+        if len(member_list) == 0:
+            message = f'Point list is still empty, no members of {role_name} found'
+        else:
+            member_list.sort(key = lambda x: x.points, reverse=True)
+            message = f'All {role.name} members has been added to point list. The new point list: \n - ' + '\n - '.join([f'{memb.name}: {memb.points}' for memb in member_list])
         await ctx.send(message)
     else:
         await ctx.send(f'{role_name} does not exist in server or typo')
 
 
 
-
+#remove a specified member
 @bot.command(name='remove', help='remove a user from the point list')
 @commands.has_any_role('role1', 'role2')
 async def remove_member(ctx, user_name: str):
@@ -137,9 +135,26 @@ async def remove_member(ctx, user_name: str):
 
 
 
+# remove all users
+@bot.command(name='remove-all', help='remove all members of the point list')
+@commands.has_any_role('role1', 'role2')
+async def remove_all(ctx):
+    if ctx.channel.name != 'point-bot':
+        await ctx.send('Commands must be specified in the point-bot channel')
+        return 
 
+    if len(member_list) == 0:
+        await ctx.send('Point list is empty, add members first')
+        return 
+
+    member_list.clear()
+    await ctx.send('Point list is now empty.')
+
+
+
+#increase the number of points for a specific user by x amount
 @bot.command(name='increase', help='increase number of points by some number')
-@commands.has_any_roles('role1', 'role2')
+@commands.has_any_role('role1', 'role2')
 async def increase(ctx, user_name: str, num: int):
     if ctx.channel.name != 'point-bot':
         await ctx.send('Commands must be specified in the point-bot channel')
@@ -175,9 +190,9 @@ async def increase(ctx, user_name: str, num: int):
 
 
 
-
+# decrease the number of points for a specific user
 @bot.command(name='decrease', help='decrease number of points by some number')
-@commands.has_any_roles('role1', 'role2')
+@commands.has_any_role('role1', 'role2')
 async def decrease(ctx, user_name: str, num: int):
     if ctx.channel.name != 'point-bot':
         await ctx.send('Commands must be specified in the point-bot channel')
@@ -187,7 +202,7 @@ async def decrease(ctx, user_name: str, num: int):
         await ctx.send('Point list is empty, add members first')
         return 
 
-    if num > 0:
+    if num < 0:
         await ctx.send('Negative number used. To increase points use !increase command.')
         return 
 
@@ -213,7 +228,7 @@ async def decrease(ctx, user_name: str, num: int):
 
 
 
-
+#print out all the points in a sorted order
 @bot.command(name='print-points', help='print out the point list')
 async def print_points(ctx):
     if len(member_list) == 0:
