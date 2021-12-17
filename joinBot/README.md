@@ -1,6 +1,6 @@
 This bot allows members of your server to get a DM when specified members of your server enter a voice channel. So if I wanted to know whenever the user 'bob44' joined a voice channel, I would receive a DM from joinBot telling me whenever 'bob44' joined a voice channel in my discord server.
 
-To setup you must add a '.env' file in the same folder as pointbot.py and its contents should be:
+To setup you must add a '.env' file in the same folder as joinBot.py and its contents should be:
 
     DISCORD_TOKEN={your discord bot token}
     DISCORD_GUILD={your discord guild}
